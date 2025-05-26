@@ -1,48 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Math Quiz</title>
-  ,<style>
-    
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .quiz-container {
+      background: rgba(255, 255, 255, 0.11);
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    #Question {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      width: 80%;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #Feedback {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    #Score {
+      font-weight: bold;
+      font-size: 18px;
+      color: #a00404;
+    }
+
+    #Timer {
+      font-weight: bold;
+      color: rgb(0, 68, 255);
+    }
   </style>
-</head >
+</head>
 <body>
-  <h2>Math Quiz</h2>
-  <p id="Question"></p>
-  <input type="text" id="Answer" />
-  <button id="submitBtn" onclick="CheckAnswer()">Submit</button>
-  <p id="Feedback"></p>
-  <p id="Score">Score: 0</p>
+  <div class="quiz-container">
+    <h2>Math Quiz</h2>
+    <p id="Question"></p>
+    <input type="number" id="Answer">
+    <br>
+    <button onclick="CheckAnswer()" id="SubmitBtn">Submit</button>
+    <p id="Feedback"></p>
+    <p id="Score">Score: 0</p>
+    <p>Time left: <span id="Timer">10</span> seconds</p>
+  </div>
 
   <script>
-    let num1, num2, correctanswer;
+    let num1, num2, correctAnswer;
     let score = 0;
+    let timeLeft = 10;
+    let timer;
+    let gameOver = false;
 
     function generateQuestion() {
+      if (gameOver) return; 
+
+      clearInterval(timer);
+      timeLeft = 10;
+      document.getElementById("Timer").textContent = timeLeft;
+      timer = setInterval(updateTimer, 1000);
+
+      const operatorsArray = ['+', '-'];
+      const randomOperator = operatorsArray[Math.floor(Math.random() * operatorsArray.length)];
       num1 = Math.floor(Math.random() * 10) + 1;
       num2 = Math.floor(Math.random() * 10) + 1;
-      correctanswer = num1 + num2;
-      document.getElementById("Question").textContent = `What is ${num1} + ${num2}?`;
+
+      correctAnswer = randomOperator === '+' ? num1 + num2 : num1 - num2;
+      document.getElementById("Question").textContent = `What is ${num1} ${randomOperator} ${num2}?`;
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      document.getElementById("Timer").textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        gameOver = true;
+        document.getElementById("Feedback").textContent = "Time's up! ⏰";
+        score--;
+        document.getElementById("Score").textContent = `Score: ${score}`;
+        document.getElementById("SubmitBtn").disabled = true;
+        document.getElementById("Answer").disabled = true;
+      }
     }
 
     function CheckAnswer() {
+      if (gameOver) return;
+
+      clearInterval(timer);
       let userAnswer = parseInt(document.getElementById("Answer").value);
-      if (userAnswer === correctanswer) {
+      if (userAnswer === correctAnswer) {
         score++;
-        document.getElementById("Feedback").textContent = "Correct!  ✅";
+        document.getElementById("Feedback").textContent = "Correct ✅";
       } else {
-        document.getElementById("Feedback").textContent = "Incorrect!  ❌";
+        score--;
+        document.getElementById("Feedback").textContent = "Incorrect ❌";
       }
+
       document.getElementById("Score").textContent = `Score: ${score}`;
       document.getElementById("Answer").value = "";
       generateQuestion();
     }
 
-    // Initialize
     generateQuestion();
   </script>
 </body>
 </html>
-
